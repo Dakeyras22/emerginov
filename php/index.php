@@ -11,7 +11,7 @@
 <body>
     <form method="POST">
         <select name="method" size="1">
-            <option value="CREATE">Créer une table</option>
+            <option value="CREATE_TAB">Créer une table</option>
             <option value="GET_TABLE">Récupérer toutes les infos d'une table</option>
             <option value="GET_ID">Récupérer une donnée grâce à son id</option>
             <option value="GET_ELT">Récupérer des données avec une valeur précise</option>
@@ -26,27 +26,65 @@
     <?php
         $ini_array = parse_ini_file("config.ini");
 
-        if($_POST['method']=="CREATE"){
-            $method = "POST";
-            $addr = "http://localhost:8000/api"
-        }elseif($_POST['method']=="GET_TABLE"){
-            $method = "GET";
-            $addr = "http://localhost:8000/"
-        }
-        
-
-        
         $json = $_POST['JSON'];
         $token = $ini_array["PROJECT_TOKEN"];
         $projectName = $ini_array["PROJECT_NAME"];
 
-        $postdata= http_build_query(
-            array(
-                'ProjectToken' => $token,
-                'ProjectName' => $projectName,
-                'data' =>$json
-            )
-        );
+        if($_POST['method']=="CREATE_TAB"){
+            $method = "POST";
+            $addr = "http://localhost:8000/api";
+            $postdata= http_build_query(
+                array(
+                    'ProjectToken' => $token,
+                    'ProjectName' => $projectName,
+                    'data' =>$json
+                )
+            );
+        }elseif($_POST['method']=="GET_TABLE"){
+            $method = "GET";
+            $dbname = $json['dbname'];
+            $addr = "http://localhost:8000/$dbname";
+            $postdata = http_build_query(array());
+        }elseif($_POST['method']=="GET_ID"){
+            $method = "GET";
+            $dbname = $json['dbname'];
+            $id = $json['id'];
+            $addr = "http://localhost:8000/$dbname/$id";
+            $postdata = http_build_query(array());
+        }elseif($_POST['method']=="GET_ELT"){
+            $method = "GET";
+            $dbname = $json['dbname'];
+            $column = $json['column'];
+            $elt = $json['elt'];
+            $addr = "http://localhost:8000/$dbname/$column/$elt";
+            $postdata = http_build_query(array());
+        }elseif($_POST['method']=="ADD_ELT"){
+            $method = "POST";
+            $addr = "http://localhost:8000/api/add";
+            $postdata= http_build_query(
+                array(
+                    'ProjectToken' => $token,
+                    'ProjectName' => $projectName,
+                    'data' =>$json
+                )
+            );
+        }elseif($_POST['method']=="PATCH_ELT"){
+            $method = "PATCH";
+            $addr = "http://localhost:8000/api/patch";
+            $postdata= http_build_query(
+                array(
+                    'ProjectToken' => $token,
+                    'ProjectName' => $projectName,
+                    'data' =>$json
+                )
+            );
+        }elseif($_POST['method']=="DELETE_ELT"){
+            $method = "DELETE";
+            $dbname = $json['dbname'];
+            $id = $json['id'];
+            $addr = "http://localhost:8000/api/$dbname/$id";
+            $postdata= http_build_query( array());
+        }
         
         $opts = array('http' =>
             array(
